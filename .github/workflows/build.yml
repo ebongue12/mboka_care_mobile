@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK MBOKA-CARE
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build APK debug
         run: flutter build apk --debug
 
       - name: Upload APK
