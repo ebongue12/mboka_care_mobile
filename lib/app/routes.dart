@@ -5,6 +5,7 @@ import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/qr/qr_screen.dart';
+import '../features/qr/scanner_screen.dart';
 import '../features/reminders/screens/reminders_screen.dart';
 import '../features/reminders/screens/add_reminder_screen.dart';
 import '../features/documents/screens/documents_screen.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String home = '/home';
   static const String qr = '/qr';
+  static const String scanner = '/scanner';
   static const String reminders = '/reminders';
   static const String addReminder = '/add-reminder';
   static const String documents = '/documents';
@@ -36,6 +38,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case qr:
         return MaterialPageRoute(builder: (_) => const QrScreen());
+      case scanner:
+        return MaterialPageRoute(builder: (_) => const ScannerScreen());
       case reminders:
         return MaterialPageRoute(builder: (_) => const RemindersScreen());
       case addReminder:
