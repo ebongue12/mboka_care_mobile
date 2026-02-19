@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/notification_service.dart';
 
 class AddReminderScreen extends StatefulWidget {
   const AddReminderScreen({super.key});
@@ -12,6 +13,52 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
   final _dosageController = TextEditingController();
   TimeOfDay _selectedTime = TimeOfDay.now();
   String _frequency = 'Quotidien';
+
+  Future<void> _saveReminder() async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Le titre est obligatoire'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Calculer la date du prochain rappel
+    final now = DateTime.now();
+    final scheduledDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _selectedTime.hour,
+      _selectedTime.minute,
+    );
+
+    // Si l'heure est passée aujourd'hui, programmer pour demain
+    final nextReminder = scheduledDate.isBefore(now)
+        ? scheduledDate.add(const Duration(days: 1))
+        : scheduledDate;
+
+    // Programmer la notification
+    await NotificationService().scheduleReminder(
+      title: _titleController.text,
+      body: 'Il est temps de prendre ${_dosageController.text.isNotEmpty ? _dosageController.text : "votre médicament"}',
+      scheduledDate: nextReminder,
+    );
+
+    if (!mounted) return;
+    
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Rappel créé: ${_titleController.text} à ${_selectedTime.format(context)}',
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,15 +156,7 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Rappel créé avec succès !'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
+                onPressed: _saveReminder,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2196F3),
                   shape: RoundedRectangleBorder(
