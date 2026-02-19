@@ -13,6 +13,8 @@ import '../features/family/screens/family_screen.dart';
 import '../features/documents/screens/upload_document_screen.dart';
 import '../features/patient/screens/medical_profile_screen.dart';
 import '../features/patient/screens/settings_screen.dart';
+import '../features/family/screens/add_family_member_screen.dart';
+import '../features/patient/screens/health_stats_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -29,6 +31,8 @@ class AppRoutes {
   static const String uploadDocument = '/upload-document';
   static const String medicalProfile = '/medical-profile';
   static const String settings = '/settings';
+  static const String addFamilyMember = '/add-family-member';
+  static const String healthStats = '/health-stats';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -57,6 +61,10 @@ class AppRoutes {
       case medicalProfile:
         return MaterialPageRoute(builder: (_) => const MedicalProfileScreen());
       case settings:
+      case addFamilyMember:
+        return MaterialPageRoute(builder: (_) => const AddFamilyMemberScreen());
+      case healthStats:
+        return MaterialPageRoute(builder: (_) => const HealthStatsScreen());
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
         return MaterialPageRoute(builder: (_) => const UploadDocumentScreen());
         return MaterialPageRoute(builder: (_) => const FamilyScreen());

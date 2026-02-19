@@ -27,7 +27,9 @@ class FamilyScreen extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.addFamilyMember);
+        },
         backgroundColor: const Color(0xFF2196F3),
         child: const Icon(Icons.person_add, color: Colors.white),
       ),
@@ -83,7 +85,9 @@ class FamilyScreen extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onPressed: () {},
+                  onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.addFamilyMember);
+        },
                 ),
               ],
             ),
