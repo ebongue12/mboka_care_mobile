@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/routes.dart';
 
 class FamilyScreen extends StatelessWidget {
   const FamilyScreen({super.key});
@@ -85,9 +86,7 @@ class FamilyScreen extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.addFamilyMember);
-        },
+                  onPressed: () {},
                 ),
               ],
             ),
