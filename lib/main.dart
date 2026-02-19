@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MbokaCareApp());
+  runApp(const ProviderScope(child: MbokaCareApp()));
 }
 
 class MbokaCareApp extends StatelessWidget {
@@ -16,13 +17,13 @@ class MbokaCareApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF2196F3),
       ),
-      home: const SplashScreen(),
+      home: const HomeScreen(),
     );
   }
 }
 
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +60,16 @@ class SplashScreen extends StatelessWidget {
             const Text(
               'Votre santé, notre priorité',
               style: TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF2196F3),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+              ),
+              child: const Text('Commencer', style: TextStyle(fontSize: 18)),
             ),
           ],
         ),
