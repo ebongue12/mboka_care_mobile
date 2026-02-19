@@ -1,51 +1,41 @@
 import 'package:flutter/material.dart';
 
-class DocumentsScreen extends StatelessWidget {
-  const DocumentsScreen({super.key});
+class FamilyScreen extends StatelessWidget {
+  const FamilyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Données fictives
-    final documents = [
+    final members = [
       {
-        'title': 'Analyse de sang',
-        'date': '15 Fév 2026',
-        'type': 'Analyse',
-        'icon': Icons.water_drop,
-        'color': Colors.red,
+        'name': 'Marie DUPONT',
+        'relation': 'Épouse',
+        'age': '35 ans',
+        'icon': Icons.person,
       },
       {
-        'title': 'Radio poumons',
-        'date': '10 Fév 2026',
-        'type': 'Imagerie',
-        'icon': Icons.medical_information,
-        'color': Colors.blue,
-      },
-      {
-        'title': 'Ordonnance',
-        'date': '5 Fév 2026',
-        'type': 'Prescription',
-        'icon': Icons.receipt_long,
-        'color': Colors.green,
+        'name': 'Lucas DUPONT',
+        'relation': 'Fils',
+        'age': '8 ans',
+        'icon': Icons.child_care,
       },
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes Documents'),
+        title: const Text('Ma Famille'),
         backgroundColor: const Color(0xFF2196F3),
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: const Color(0xFF2196F3),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.person_add, color: Colors.white),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: documents.length,
+        itemCount: members.length,
         itemBuilder: (context, index) {
-          final doc = documents[index];
+          final member = members[index];
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
@@ -61,16 +51,12 @@ class DocumentsScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: (doc['color'] as Color).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: const Color(0xFF2196F3).withOpacity(0.1),
                   child: Icon(
-                    doc['icon'] as IconData,
-                    color: doc['color'] as Color,
+                    member['icon'] as IconData,
+                    color: const Color(0xFF2196F3),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -79,14 +65,14 @@ class DocumentsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        doc['title'] as String,
+                        member['name'] as String,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                         ),
                       ),
                       Text(
-                        '${doc['type']} • ${doc['date']}',
+                        '${member['relation']} • ${member['age']}',
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 14,
@@ -96,7 +82,7 @@ class DocumentsScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.download),
+                  icon: const Icon(Icons.arrow_forward_ios, size: 16),
                   onPressed: () {},
                 ),
               ],
