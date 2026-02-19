@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../app/routes.dart';
 
 class DocumentsScreen extends StatelessWidget {
   const DocumentsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Données fictives
     final documents = [
       {
         'title': 'Analyse de sang',
@@ -37,7 +37,9 @@ class DocumentsScreen extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.uploadDocument);
+        },
         backgroundColor: const Color(0xFF2196F3),
         child: const Icon(Icons.add, color: Colors.white),
       ),

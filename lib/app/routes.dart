@@ -10,6 +10,7 @@ import '../features/reminders/screens/reminders_screen.dart';
 import '../features/reminders/screens/add_reminder_screen.dart';
 import '../features/documents/screens/documents_screen.dart';
 import '../features/family/screens/family_screen.dart';
+import '../features/documents/screens/upload_document_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String addReminder = '/add-reminder';
   static const String documents = '/documents';
   static const String family = '/family';
+  static const String uploadDocument = '/upload-document';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -47,6 +49,8 @@ class AppRoutes {
       case documents:
         return MaterialPageRoute(builder: (_) => const DocumentsScreen());
       case family:
+      case uploadDocument:
+        return MaterialPageRoute(builder: (_) => const UploadDocumentScreen());
         return MaterialPageRoute(builder: (_) => const FamilyScreen());
       default:
         return MaterialPageRoute(
