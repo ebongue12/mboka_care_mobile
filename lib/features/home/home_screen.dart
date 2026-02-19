@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/routes.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,10 +32,10 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _buildCard(Icons.qr_code, 'Mon QR Code', Colors.blue),
-                  _buildCard(Icons.qr_code_scanner, 'Scanner', Colors.green),
-                  _buildCard(Icons.alarm, 'Rappels', Colors.purple),
-                  _buildCard(Icons.folder, 'Documents', Colors.orange),
+                  _buildCard(context, Icons.qr_code, 'Mon QR Code', Colors.blue, AppRoutes.qr),
+                  _buildCard(context, Icons.qr_code_scanner, 'Scanner', Colors.green, null),
+                  _buildCard(context, Icons.alarm, 'Rappels', Colors.purple, null),
+                  _buildCard(context, Icons.folder, 'Documents', Colors.orange, null),
                 ],
               ),
             ),
@@ -44,11 +45,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(IconData icon, String label, Color color) {
+  Widget _buildCard(BuildContext context, IconData icon, String label, Color color, String? route) {
     return Card(
       elevation: 2,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          if (route != null) {
+            Navigator.pushNamed(context, route);
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
