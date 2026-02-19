@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
                 mainAxisSpacing: 16,
                 children: [
                   _buildCard(context, Icons.qr_code, 'Mon QR Code', Colors.blue, AppRoutes.qr),
-                  _buildCard(context, Icons.qr_code_scanner, 'Scanner', Colors.green, null),
+                  _buildCard(context, Icons.qr_code_scanner, 'Scanner', Colors.green, AppRoutes.scanner),
                   _buildCard(context, Icons.alarm, 'Rappels', Colors.purple, null),
                   _buildCard(context, Icons.folder, 'Documents', Colors.orange, null),
                 ],
