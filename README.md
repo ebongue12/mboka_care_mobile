@@ -1,16 +1,89 @@
-# mboka_care_mobile
+# MBOKA-CARE Mobile App
 
-A new Flutter project.
+Application mobile Flutter pour la gestion de santé personnelle et familiale.
 
-## Getting Started
+## 🚀 Fonctionnalités
 
-This project is a starting point for a Flutter application.
+### ✅ Implémentées
+- 🔐 Authentification (Login/Register)
+- 👤 Gestion du profil médical complet
+- 📱 QR Code d'urgence (génération et affichage)
+- 🔍 Scanner QR Code (version simulée)
+- ⏰ Système de rappels médicaments
+- 📄 Gestion de documents médicaux
+- 📤 Upload de documents (photo/galerie/fichiers)
+- 👨‍👩‍👧‍👦 Gestion de la famille
+- 📊 Statistiques de santé
+- 🔔 Service de notifications
+- ⚙️ Paramètres utilisateur
+- 🎨 Interface moderne et intuitive
 
-A few resources to get you started if this is your first Flutter project:
+### 🔄 À venir
+- 📸 Scanner QR Code avec caméra réelle
+- 🌐 Connexion au backend Django
+- 🔔 Notifications push
+- 💳 Système de paiement (Premium)
+- 🏥 Module médecin
+- 🏨 Module hôpital
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🛠️ Technologies
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Framework**: Flutter 3.24+
+- **State Management**: Riverpod
+- **Storage**: SharedPreferences
+- **HTTP Client**: Dio
+- **QR Code**: qr_flutter
+- **Autres**: image_picker, file_picker, intl, google_fonts
+
+## 📦 Installation
+```bash
+# Cloner le repo
+git clone https://github.com/ebongue12/mboka_care_mobile.git
+
+# Installer les dépendances
+flutter pub get
+
+# Lancer l'app
+flutter run
+```
+
+## 🏗️ Structure du projet
+```
+lib/
+├── app/                    # Configuration globale
+├── core/                   # Services core (API, Storage)
+├── data/                   # Modèles et providers
+├── features/              # Fonctionnalités par module
+│   ├── auth/
+│   ├── patient/
+│   ├── qr/
+│   ├── reminders/
+│   ├── documents/
+│   └── family/
+└── shared/                # Widgets partagés
+```
+
+## 🔗 Configuration Backend
+
+Modifier `lib/app/config.dart` :
+```dart
+static const String apiBaseUrl = 'https://votre-backend.com/api/v1';
+```
+
+## 📱 Build APK
+```bash
+# Debug
+flutter build apk --debug
+
+# Release
+flutter build apk --release
+```
+
+## 👨‍💻 Auteur
+
+**Mbouma Ebongue Guillaume**
+- GitHub: [@ebongue12](https://github.com/ebongue12)
+
+## 📄 Licence
+
+Ce projet est sous licence MIT.
