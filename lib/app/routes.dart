@@ -64,7 +64,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AddFamilyMemberScreen());
       case medicalProfile:
         return MaterialPageRoute(builder: (_) => const MedicalProfileScreen());
-      case AppRoutes.settings:
+      case settings:
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
       case healthStats:
         return MaterialPageRoute(builder: (_) => const HealthStatsScreen());
