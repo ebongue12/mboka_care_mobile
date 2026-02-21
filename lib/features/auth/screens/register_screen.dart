@@ -7,6 +7,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
+import '../providers/auth_provider.dart';
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
