@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../features/splash/animated_splash_screen.dart';
+import '../features/splash/splash_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
-import '../features/auth/screens/modern_login_screen.dart';
+import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
-import '../features/home/modern_home_screen.dart';
-import '../features/qr/modern_qr_screen.dart';
+import '../features/home/home_screen.dart';
+import '../features/qr/qr_screen.dart';
 import '../features/qr/scanner_screen.dart';
 import '../features/reminders/screens/reminders_screen.dart';
 import '../features/reminders/screens/add_reminder_screen.dart';
@@ -37,86 +37,43 @@ class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case splash:
-        return _fadeRoute(const AnimatedSplashScreen());
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
       case onboarding:
-        return _slideRoute(const OnboardingScreen());
+        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case login:
-        return _fadeRoute(const ModernLoginScreen());
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
       case register:
-        return _slideRoute(const RegisterScreen());
+        return MaterialPageRoute(builder: (_) => const RegisterScreen());
       case home:
-        return _fadeRoute(const ModernHomeScreen());
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
       case qr:
-        return _slideRoute(const ModernQrScreen());
+        return MaterialPageRoute(builder: (_) => const QrScreen());
       case scanner:
-        return _slideRoute(const ScannerScreen());
+        return MaterialPageRoute(builder: (_) => const ScannerScreen());
       case reminders:
-        return _slideRoute(const RemindersScreen());
+        return MaterialPageRoute(builder: (_) => const RemindersScreen());
       case addReminder:
-        return _slideRoute(const AddReminderScreen());
+        return MaterialPageRoute(builder: (_) => const AddReminderScreen());
       case documents:
-        return _slideRoute(const DocumentsScreen());
+        return MaterialPageRoute(builder: (_) => const DocumentsScreen());
       case uploadDocument:
-        return _slideRoute(const UploadDocumentScreen());
+        return MaterialPageRoute(builder: (_) => const UploadDocumentScreen());
       case family:
-        return _slideRoute(const FamilyScreen());
+        return MaterialPageRoute(builder: (_) => const FamilyScreen());
       case addFamilyMember:
-        return _slideRoute(const AddFamilyMemberScreen());
+        return MaterialPageRoute(builder: (_) => const AddFamilyMemberScreen());
       case medicalProfile:
-        return _slideRoute(const MedicalProfileScreen());
+        return MaterialPageRoute(builder: (_) => const MedicalProfileScreen());
       case '/settings':
-        return _slideRoute(const SettingsScreen());
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
       case healthStats:
-        return _slideRoute(const HealthStatsScreen());
+        return MaterialPageRoute(builder: (_) => const HealthStatsScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Route ${settings.name} introuvable',
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
+            body: Center(child: Text('Route ${settings.name} introuvable')),
           ),
         );
     }
-  }
-
-  // Transition personnalisée Fade
-  static Route _fadeRoute(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 300),
-    );
-  }
-
-  // Transition personnalisée Slide
-  static Route _slideRoute(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOutCubic;
-        var tween = Tween(begin: begin, end: end).chain(
-          CurveTween(curve: curve),
-        );
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-      transitionDuration: const Duration(milliseconds: 400),
-    );
   }
 }
