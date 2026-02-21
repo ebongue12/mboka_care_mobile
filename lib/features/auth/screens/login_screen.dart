@@ -8,6 +8,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
   @override
 import '../providers/auth_provider.dart';
+import '../providers/auth_provider.dart';
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
