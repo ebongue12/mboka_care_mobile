@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/onboarding/role_selection_screen.dart';
+import '../features/doctor/screens/doctor_dashboard_screen.dart';
+import '../features/hospital/screens/hospital_dashboard_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/home/home_screen.dart';
@@ -19,6 +22,9 @@ import '../features/patient/screens/health_stats_screen.dart';
 class AppRoutes {
   static const String splash = '/';
   static const String onboarding = '/onboarding';
+  static const String roleSelection = '/role-selection';
+  static const String doctorDashboard = '/doctor-dashboard';
+  static const String hospitalDashboard = '/hospital-dashboard';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
@@ -39,6 +45,12 @@ class AppRoutes {
       case splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case onboarding:
+      case roleSelection:
+        return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
+      case doctorDashboard:
+        return MaterialPageRoute(builder: (_) => const DoctorDashboardScreen());
+      case hospitalDashboard:
+        return MaterialPageRoute(builder: (_) => const HospitalDashboardScreen());
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());

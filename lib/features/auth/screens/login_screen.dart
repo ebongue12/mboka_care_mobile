@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
+import '../../../core/storage/local_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +12,29 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _selectedRole = 'patient'; // Par défaut patient
+
+  void _login() async {
+    // Sauvegarder le rôle
+    await LocalStorage.saveUserId(_selectedRole);
+    
+    if (!mounted) return;
+    
+    // Rediriger selon le rôle
+    String route;
+    switch (_selectedRole) {
+      case 'doctor':
+        route = AppRoutes.doctorDashboard;
+        break;
+      case 'hospital':
+        route = AppRoutes.hospitalDashboard;
+        break;
+      default:
+        route = AppRoutes.home;
+    }
+    
+    Navigator.pushReplacementNamed(context, route);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 40),
                 const Text(
-                  'Bon retour !',
+                  'Connexion',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -72,13 +96,36 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Connectez-vous pour continuer',
+                  'Connectez-vous à votre compte',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey.shade700,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
+                
+                // Sélection du rôle
+                const Text('Je suis :',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildRoleButton('patient', 'Patient', Icons.person),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildRoleButton('doctor', 'Médecin', Icons.medical_services),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildRoleButton('hospital', 'Hôpital', Icons.local_hospital),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+                
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -94,31 +141,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '+237 6XX XXX XXX',
-                      prefixIcon: Container(
-                        margin: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.phone_android,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                      prefixIcon: Icon(Icons.phone),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
+                      contentPadding: EdgeInsets.all(20),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -134,27 +165,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Mot de passe',
-                      prefixIcon: Container(
-                        margin: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.lock_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                      prefixIcon: Icon(Icons.lock),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
+                      contentPadding: EdgeInsets.all(20),
                     ),
                   ),
                 ),
@@ -177,29 +192,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          AppRoutes.home,
-                        );
-                      },
+                      onTap: _login,
                       borderRadius: BorderRadius.circular(12),
                       child: const Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Se connecter',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                          ],
+                        child: Text(
+                          'Se connecter',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -209,20 +211,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: TextButton(
                     onPressed: () =>
-                        Navigator.pushNamed(context, AppRoutes.register),
-                    child: RichText(
-                      text: const TextSpan(
-                        text: 'Pas de compte ? ',
-                        style: TextStyle(color: Colors.grey),
-                        children: [
-                          TextSpan(
-                            text: "S'inscrire",
-                            style: TextStyle(
-                              color: Color(0xFF2196F3),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                        Navigator.pushNamed(context, AppRoutes.roleSelection),
+                    child: const Text(
+                      "Pas de compte ? S'inscrire",
+                      style: TextStyle(
+                        color: Color(0xFF2196F3),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -230,6 +224,42 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleButton(String role, String label, IconData icon) {
+    final isSelected = _selectedRole == role;
+    return InkWell(
+      onTap: () => setState(() => _selectedRole = role),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2196F3) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF2196F3) : Colors.grey.shade300,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : Colors.grey,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: isSelected ? Colors.white : Colors.grey,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       ),
     );
