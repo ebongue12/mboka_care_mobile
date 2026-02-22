@@ -19,7 +19,7 @@ class ReminderModel {
 
   factory ReminderModel.fromJson(Map<String, dynamic> json) {
     return ReminderModel(
-      id: json['id'],
+      id: json['id'].toString(),
       title: json['title'],
       medicationName: json['medication_name'],
       dosage: json['dosage'],
