@@ -1,6 +1,6 @@
-import '../../app/config.dart';
 import 'package:dio/dio.dart';
 import '../storage/local_storage.dart';
+import '../../app/config.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
@@ -19,7 +19,6 @@ class ApiClient {
       },
     ));
 
-    // Intercepteur pour ajouter le token
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         final token = LocalStorage.getToken();
@@ -29,9 +28,7 @@ class ApiClient {
         return handler.next(options);
       },
       onError: (error, handler) {
-        // Gestion centralisée des erreurs
         if (error.response?.statusCode == 401) {
-          // Token expiré - déconnexion
           LocalStorage.clearAll();
         }
         return handler.next(error);
@@ -41,7 +38,7 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  // Auth endpoints
+  // Auth
   Future<Response> register(Map<String, dynamic> data) async {
     return await _dio.post('/auth/register/', data: data);
   }
@@ -54,7 +51,7 @@ class ApiClient {
     return await _dio.post('/auth/logout/');
   }
 
-  // Patient endpoints
+  // Patient
   Future<Response> getPatientProfile() async {
     return await _dio.get('/patients/me/');
   }
@@ -63,16 +60,7 @@ class ApiClient {
     return await _dio.put('/patients/me/', data: data);
   }
 
-  // Family endpoints
-  Future<Response> getFamilyMembers() async {
-    return await _dio.get('/patients/family-members/');
-  }
-
-  Future<Response> addFamilyMember(Map<String, dynamic> data) async {
-    return await _dio.post('/patients/family-members/', data: data);
-  }
-
-  // QR Code endpoints
+  // QR Code
   Future<Response> generatePatientQR() async {
     return await _dio.get('/patients/qr/generate/');
   }
@@ -85,7 +73,7 @@ class ApiClient {
     return await _dio.post('/patients/qr/scan/', data: data);
   }
 
-  // Documents endpoints
+  // Documents
   Future<Response> getDocuments() async {
     return await _dio.get('/medical/documents/');
   }
@@ -98,7 +86,7 @@ class ApiClient {
     return await _dio.delete('/medical/documents/$id/');
   }
 
-  // Reminders endpoints
+  // Reminders
   Future<Response> getReminders() async {
     return await _dio.get('/reminders/');
   }
@@ -119,7 +107,33 @@ class ApiClient {
     return await _dio.post('/reminders/logs/', data: data);
   }
 
-  // Notifications endpoints
+  // Care Contacts (Proches)
+  Future<Response> getCareContacts() async {
+    return await _dio.get('/patients/care-contacts/');
+  }
+
+  Future<Response> addCareContact(Map<String, dynamic> data) async {
+    return await _dio.post('/patients/care-contacts/', data: data);
+  }
+
+  Future<Response> updateCareContact(String id, Map<String, dynamic> data) async {
+    return await _dio.put('/patients/care-contacts/$id/', data: data);
+  }
+
+  Future<Response> deleteCareContact(String id) async {
+    return await _dio.delete('/patients/care-contacts/$id/');
+  }
+
+  // Family
+  Future<Response> getFamilyMembers() async {
+    return await _dio.get('/patients/family-members/');
+  }
+
+  Future<Response> addFamilyMember(Map<String, dynamic> data) async {
+    return await _dio.post('/patients/family-members/', data: data);
+  }
+
+  // Notifications
   Future<Response> getNotifications() async {
     return await _dio.get('/notifications/');
   }
@@ -128,7 +142,7 @@ class ApiClient {
     return await _dio.patch('/notifications/$id/read/');
   }
 
-  // Statistics endpoints
+  // Statistics
   Future<Response> getHealthStats() async {
     return await _dio.get('/patients/stats/');
   }

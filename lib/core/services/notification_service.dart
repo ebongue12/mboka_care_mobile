@@ -1,3 +1,4 @@
+import '../../app/config.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/reminder_model.dart';
 import '../../data/models/care_contact_model.dart';
