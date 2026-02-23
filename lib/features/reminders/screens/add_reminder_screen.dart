@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/notification_service.dart';
 
 class AddReminderScreen extends StatefulWidget {
   const AddReminderScreen({super.key});
@@ -24,28 +23,6 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
       );
       return;
     }
-
-    // Calculer la date du prochain rappel
-    final now = DateTime.now();
-    final scheduledDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
-    );
-
-    // Si l'heure est passée aujourd'hui, programmer pour demain
-    final nextReminder = scheduledDate.isBefore(now)
-        ? scheduledDate.add(const Duration(days: 1))
-        : scheduledDate;
-
-    // Programmer la notification
-    await NotificationService().scheduleReminder(
-      title: _titleController.text,
-      body: 'Il est temps de prendre ${_dosageController.text.isNotEmpty ? _dosageController.text : "votre médicament"}',
-      scheduledDate: nextReminder,
-    );
 
     if (!mounted) return;
     
@@ -177,5 +154,12 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _dosageController.dispose();
+    super.dispose();
   }
 }
