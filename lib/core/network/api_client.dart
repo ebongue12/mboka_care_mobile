@@ -1,6 +1,6 @@
+import '../../app/config.dart';
 import 'package:dio/dio.dart';
 import '../storage/local_storage.dart';
-import '../../app/config.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
