@@ -7,6 +7,9 @@ class LocalStorage {
     _prefs = await SharedPreferences.getInstance();
   }
 
+  // Getter public pour accéder à _prefs
+  static SharedPreferences get instance => _prefs;
+
   static Future<void> saveToken(String token) async {
     await _prefs.setString('access_token', token);
   }
