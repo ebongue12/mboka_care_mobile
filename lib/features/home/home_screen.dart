@@ -4,7 +4,6 @@ import '../../core/theme/app_theme.dart';
 import '../../core/storage/local_storage.dart';
 import '../../shared/widgets/animated_card.dart';
 import '../../shared/widgets/slide_fade_transition.dart';
-import '../../shared/widgets/glass_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildDrawer(context),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -102,16 +102,226 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  // DRAWER MENU COMPLET
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2196F3), Colors.white],
+            stops: [0.3, 0.3],
+          ),
+        ),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: AppTheme.primaryBlue,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Patient Test',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Text(
+                    '+237 600 000 000',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            
+            // ACCUEIL
+            ListTile(
+              leading: const Icon(Icons.home, color: AppTheme.primaryBlue),
+              title: const Text('Accueil'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _selectedIndex = 0);
+              },
+            ),
+            
+            const Divider(),
+            
+            // SANTÉ
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'MA SANTÉ',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+            
+            ListTile(
+              leading: const Icon(Icons.qr_code, color: AppTheme.primaryBlue),
+              title: const Text('Mon QR Code'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.qr);
+              },
+            ),
+            
+            ListTile(
+              leading: const Icon(Icons.alarm, color: AppTheme.accentOrange),
+              title: const Text('Mes Rappels'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.reminders);
+              },
+            ),
+            
+            ListTile(
+              leading: const Icon(Icons.folder, color: AppTheme.accentPurple),
+              title: const Text('Mes Documents'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.documents);
+              },
+            ),
+            
+            const Divider(),
+            
+            // FAMILLE & PROCHES
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'FAMILLE & PROCHES',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+            
+            ListTile(
+              leading: const Icon(Icons.family_restroom, color: AppTheme.accentGreen),
+              title: const Text('Ma Famille'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.family);
+              },
+            ),
+            
+            ListTile(
+              leading: const Icon(Icons.people, color: AppTheme.primaryBlue),
+              title: const Text('Mes Proches'),
+              subtitle: const Text('Suivi médicaments', style: TextStyle(fontSize: 11)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.careContacts);
+              },
+            ),
+            
+            const Divider(),
+            
+            // PARAMÈTRES
+            ListTile(
+              leading: const Icon(Icons.bar_chart, color: Colors.grey),
+              title: const Text('Statistiques'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _selectedIndex = 1);
+              },
+            ),
+            
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.grey),
+              title: const Text('Paramètres'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.settings);
+              },
+            ),
+            
+            const Divider(),
+            
+            // DÉCONNEXION
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Déconnexion',
+                  style: TextStyle(color: Colors.red)),
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Déconnexion'),
+                    content: const Text('Voulez-vous vraiment vous déconnecter ?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Annuler'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Déconnexion',
+                            style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+                
+                if (confirm == true) {
+                  await LocalStorage.clearAll();
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.login,
+                    (route) => false,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHomeTab() {
     return CustomScrollView(
       slivers: [
-        // App Bar moderne
+        // App Bar avec menu burger
         SliverAppBar(
           expandedHeight: 200,
           floating: false,
           pinned: true,
           elevation: 0,
           backgroundColor: Colors.transparent,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: const BoxDecoration(
@@ -186,25 +396,13 @@ class _HomeScreenState extends State<HomeScreen>
             delegate: SliverChildListDelegate([
               const SizedBox(height: 20),
               
-              // Carte d'urgence
-              SlideFadeTransition(
-                delay: const Duration(milliseconds: 100),
-                child: _buildEmergencyCard(),
-              ),
-              
-              const SizedBox(height: 24),
-              
+              // Actions rapides
               const Text(
                 'Actions rapides',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              
               const SizedBox(height: 16),
               
-              // Grille d'actions
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -249,107 +447,18 @@ class _HomeScreenState extends State<HomeScreen>
                     delay: const Duration(milliseconds: 500),
                     child: _buildActionCard(
                       context,
-                      'Ma Famille',
-                      Icons.family_restroom,
+                      'Mes Proches',
+                      Icons.people,
                       AppTheme.successGradient,
-                      AppRoutes.family,
+                      AppRoutes.careContacts,
                     ),
                   ),
                 ],
-              ),
-              
-              const SizedBox(height: 24),
-              
-              const Text(
-                'Rappels du jour',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              SlideFadeTransition(
-                delay: const Duration(milliseconds: 600),
-                child: _buildReminderCard('Paracétamol', '08:00', '500mg'),
-              ),
-              
-              SlideFadeTransition(
-                delay: const Duration(milliseconds: 700),
-                child: _buildReminderCard('Vitamine D', '12:00', '1 comprimé'),
               ),
             ]),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildEmergencyCard() {
-    return AnimatedCard(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.qr),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFE91E63), Color(0xFFC2185B)],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFE91E63).withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Icon(
-                Icons.emergency,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
-            const SizedBox(width: 16),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'QR Code d\'Urgence',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Toujours prêt en cas d\'urgence',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.white,
-              size: 16,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -401,85 +510,11 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildReminderCard(String title, String time, String dosage) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.medication,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$time • $dosage',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'Pris ✓',
-              style: TextStyle(
-                color: Colors.green.shade700,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildStatsTab() {
-    return const Center(child: Text('Stats Tab - Coming Soon'));
+    return const Center(child: Text('Statistiques - En développement'));
   }
 
   Widget _buildProfileTab() {
-    return const Center(child: Text('Profile Tab - Coming Soon'));
+    return const Center(child: Text('Profil - En développement'));
   }
 }
