@@ -1,6 +1,6 @@
 class AppConfig {
   // 🔥 URL DE VOTRE BACKEND DJANGO
-  static const String apiBaseUrl = 'https://votre-backend-django.replit.dev/api/v1';
+  static const String apiBaseUrl = 'https://37736e58-7d02-4811-a573-d708bdb233c-00-bem7ckckqz6c.worf.replit.dev/api/v1';
   
   // Configuration API
   static const Duration connectTimeout = Duration(seconds: 30);
