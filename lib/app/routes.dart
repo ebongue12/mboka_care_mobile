@@ -6,6 +6,8 @@ import '../features/doctor/screens/doctor_dashboard_screen.dart';
 import '../features/hospital/screens/hospital_dashboard_screen.dart';
 import '../features/care_contacts/screens/care_contacts_screen.dart';
 import '../features/care_contacts/screens/add_care_contact_screen.dart';
+import '../features/care_contacts/screens/care_contacts_screen.dart';
+import '../features/care_contacts/screens/add_care_contact_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/home/home_screen.dart';
@@ -27,6 +29,8 @@ class AppRoutes {
   static const String roleSelection = '/role-selection';
   static const String doctorDashboard = '/doctor-dashboard';
   static const String hospitalDashboard = '/hospital-dashboard';
+  static const String careContacts = '/care-contacts';
+  static const String addCareContact = '/add-care-contact';
   static const String careContacts = '/care-contacts';
   static const String addCareContact = '/add-care-contact';
   static const String login = '/login';
@@ -54,6 +58,10 @@ class AppRoutes {
       case doctorDashboard:
         return MaterialPageRoute(builder: (_) => const DoctorDashboardScreen());
       case hospitalDashboard:
+      case careContacts:
+        return MaterialPageRoute(builder: (_) => const CareContactsScreen());
+      case addCareContact:
+        return MaterialPageRoute(builder: (_) => const AddCareContactScreen());
       case careContacts:
         return MaterialPageRoute(builder: (_) => const CareContactsScreen());
       case addCareContact:
