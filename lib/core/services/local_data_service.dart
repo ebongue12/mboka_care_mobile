@@ -10,7 +10,7 @@ class LocalDataService {
   static const String _familyKey = 'saved_family';
 
 static Future<List<ReminderModel>> getReminders() async {
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final String? remindersJson = prefs.getString(_remindersKey);
     
     if (remindersJson == null) return [];
@@ -23,7 +23,7 @@ static Future<List<ReminderModel>> getReminders() async {
     final reminders = await getReminders();
     reminders.add(reminder);
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(reminders.map((r) => r.toJson()).toList());
     return await prefs.setString(_remindersKey, encoded);
   }
@@ -36,7 +36,7 @@ static Future<List<ReminderModel>> getReminders() async {
     
     reminders[index] = reminder;
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(reminders.map((r) => r.toJson()).toList());
     return await prefs.setString(_remindersKey, encoded);
   }
@@ -45,12 +45,12 @@ static Future<List<ReminderModel>> getReminders() async {
     final reminders = await getReminders();
     reminders.removeWhere((r) => r.id == id);
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(reminders.map((r) => r.toJson()).toList());
     return await prefs.setString(_remindersKey, encoded);
   }
 static Future<List<CareContactModel>> getCareContacts() async {
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final String? contactsJson = prefs.getString(_contactsKey);
     
     if (contactsJson == null) return [];
@@ -63,7 +63,7 @@ static Future<List<CareContactModel>> getCareContacts() async {
     final contacts = await getCareContacts();
     contacts.add(contact);
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(contacts.map((c) => c.toJson()).toList());
     return await prefs.setString(_contactsKey, encoded);
   }
@@ -72,12 +72,12 @@ static Future<List<CareContactModel>> getCareContacts() async {
     final contacts = await getCareContacts();
     contacts.removeWhere((c) => c.id == id);
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(contacts.map((c) => c.toJson()).toList());
     return await prefs.setString(_contactsKey, encoded);
   }
 static Future<List<Map<String, dynamic>>> getDocuments() async {
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final String? docsJson = prefs.getString(_documentsKey);
     
     if (docsJson == null) return [];
@@ -90,12 +90,12 @@ static Future<List<Map<String, dynamic>>> getDocuments() async {
     final documents = await getDocuments();
     documents.add(document);
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(documents);
     return await prefs.setString(_documentsKey, encoded);
   }
 static Future<List<Map<String, dynamic>>> getFamilyMembers() async {
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final String? familyJson = prefs.getString(_familyKey);
     
     if (familyJson == null) return [];
@@ -108,12 +108,12 @@ static Future<List<Map<String, dynamic>>> getFamilyMembers() async {
     final family = await getFamilyMembers();
     family.add(member);
     
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     final encoded = jsonEncode(family);
     return await prefs.setString(_familyKey, encoded);
   }
 static Future<void> clearAll() async {
-    final prefs = await LocalStorage.prefs;
+    final prefs = LocalStorage._prefs;
     await prefs.remove(_remindersKey);
     await prefs.remove(_contactsKey);
     await prefs.remove(_documentsKey);
