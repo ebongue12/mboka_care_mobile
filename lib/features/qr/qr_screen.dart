@@ -163,7 +163,7 @@ class QrScreen extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: [
                                 AppTheme.primaryBlue.withOpacity(0.05),
-                                AppTheme.primaryLight.withOpacity(0.05),
+                                AppTheme.primaryBlue.withOpacity(0.05),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
