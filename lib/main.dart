@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'app/routes.dart';
 import 'core/storage/local_storage.dart';
 import 'core/theme/app_theme.dart';
-import 'core/services/local_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   await LocalStorage.init();
-  await LocalNotificationService().initialize();
   
   runApp(const MbokaCareApp());
 }
