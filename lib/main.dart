@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/routes.dart';
 import 'core/storage/local_storage.dart';
+import 'core/theme/app_theme.dart';
+import 'core/services/local_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   await LocalStorage.init();
-  runApp(const ProviderScope(child: MbokaCareApp()));
+  await LocalNotificationService().initialize();
+  
+  runApp(const MbokaCareApp());
 }
 
 class MbokaCareApp extends StatelessWidget {
@@ -17,12 +21,9 @@ class MbokaCareApp extends StatelessWidget {
     return MaterialApp(
       title: 'MBOKA-CARE',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF2196F3),
-      ),
-      initialRoute: AppRoutes.splash,
+      theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.generateRoute,
+      initialRoute: AppRoutes.splash,
     );
   }
 }

@@ -38,7 +38,7 @@ class AppTheme {
       colorSchemeSeed: primaryBlue,
       
       // Typographie Google Fonts
-      textTheme: GoogleFonts.poppinsTextTheme(),
+      // textTheme: GoogleFonts.poppinsTextTheme(),
       
       // AppBar
       appBarTheme: const AppBarTheme(
