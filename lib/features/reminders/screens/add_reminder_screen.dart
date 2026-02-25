@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/services/data_sync_service.dart';
 import '../../../data/models/reminder_model.dart';
+import '../../../core/services/notification_manager.dart';
 
 class AddReminderScreen extends StatefulWidget {
   const AddReminderScreen({super.key});
@@ -13,7 +14,8 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
   final _titleController = TextEditingController();
   final _dosageController = TextEditingController();
   final _instructionsController = TextEditingController();
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  
+  TimeOfDay _selectedTime = const TimeOfDay(hour: 8, minute: 0);
   String _frequency = 'Quotidien';
   bool _isSaving = false;
 
@@ -30,7 +32,6 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
 
     setState(() => _isSaving = true);
 
-    // Créer le rappel
     final reminder = ReminderModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       type: 'medication',
@@ -39,26 +40,29 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
       dosage: _dosageController.text.isNotEmpty ? _dosageController.text : null,
       frequency: _frequency,
       timeSlots: ['${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}'],
-      instructions: _instructionsController.text.isNotEmpty
-          ? _instructionsController.text
-          : null,
+      instructions: _instructionsController.text.isNotEmpty ? _instructionsController.text : null,
       isActive: true,
       createdAt: DateTime.now(),
     );
 
-    // Sauvegarder localement
+    // Sauvegarder (local + backend)
     final success = await DataSyncService().saveReminder(reminder);
+
+    // 🔔 PROGRAMMER L'ALARME RÉELLE
+    if (success) {
+      await NotificationManager().scheduleReminder(reminder);
+    }
 
     setState(() => _isSaving = false);
 
     if (!mounted) return;
 
     if (success) {
-      Navigator.pop(context, true); // Retour avec succès
+      Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '✓ Rappel "${_titleController.text}" créé avec succès !',
+            '✓ Rappel créé ! Alarme à ${_selectedTime.format(context)}',
           ),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 3),
@@ -78,7 +82,7 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nouveau Rappel'),
+        title: const Text('Nouveau rappel'),
         backgroundColor: const Color(0xFF2196F3),
         foregroundColor: Colors.white,
       ),
@@ -87,7 +91,6 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info box
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -97,11 +100,11 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700),
+                  Icon(Icons.alarm, color: Colors.blue.shade700),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
-                      'Vos proches seront notifiés de vos prises',
+                      'L\'alarme sonnera à l\'heure programmée',
                       style: TextStyle(fontSize: 13),
                     ),
                   ),
@@ -111,54 +114,44 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
             
             const SizedBox(height: 24),
             
-            const Text('Médicament *',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('Médicament *', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
                 hintText: 'Ex: Paracétamol 500mg',
                 prefixIcon: const Icon(Icons.medication),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             
             const SizedBox(height: 16),
-            const Text('Dosage',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('Dosage', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _dosageController,
               decoration: InputDecoration(
-                hintText: 'Ex: 1 comprimé, 5ml, 500mg',
+                hintText: 'Ex: 1 comprimé, 5ml',
                 prefixIcon: const Icon(Icons.science),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             
             const SizedBox(height: 16),
-            const Text('Instructions',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('Instructions', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _instructionsController,
               maxLines: 2,
               decoration: InputDecoration(
                 hintText: 'Ex: Prendre après le repas avec de l\'eau',
-                prefixIcon: const Icon(Icons.notes),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                prefixIcon: const Icon(Icons.info_outline),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             
             const SizedBox(height: 16),
-            const Text('Heure de prise',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('Heure de prise', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             InkWell(
               onTap: () async {
@@ -181,27 +174,22 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
                     const Icon(Icons.access_time, color: Colors.grey),
                     const SizedBox(width: 12),
                     Text(
-                      '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      _selectedTime.format(context),
+                      style: const TextStyle(fontSize: 16),
                     ),
-                    const Spacer(),
-                    const Text('Modifier', style: TextStyle(color: Color(0xFF2196F3))),
                   ],
                 ),
               ),
             ),
             
             const SizedBox(height: 16),
-            const Text('Fréquence',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('Fréquence', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _frequency,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.repeat),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               items: ['Quotidien', 'Tous les 2 jours', 'Hebdomadaire', 'Mensuel']
                   .map((f) => DropdownMenuItem(value: f, child: Text(f)))
@@ -212,16 +200,15 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
             ),
             
             const SizedBox(height: 32),
+            
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
                 onPressed: _isSaving ? null : _saveReminder,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2196F3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  backgroundColor: const Color(0xFF4CAF50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: _isSaving
                     ? const CircularProgressIndicator(color: Colors.white)
@@ -232,11 +219,7 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
                           SizedBox(width: 8),
                           Text(
                             'Créer le rappel',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                         ],
                       ),

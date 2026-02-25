@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
-import '../../../data/services/data_sync_service.dart';
+import '../../../core/services/local_data_service.dart';
 import '../../../data/models/reminder_model.dart';
 import '../../../shared/widgets/slide_fade_transition.dart';
 
@@ -24,8 +24,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
   Future<void> _loadReminders() async {
     setState(() => _isLoading = true);
     
-    // ✅ UTILISE LE SERVICE UNIFIÉ (Local + API)
-    final reminders = await DataSyncService().getReminders();
+    final reminders = await LocalDataService.getReminders();
     
     setState(() {
       _reminders = reminders;
@@ -54,8 +53,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
     );
 
     if (confirm == true) {
-      // ✅ UTILISE LE SERVICE UNIFIÉ
-      await DataSyncService().deleteReminder(id);
+      await LocalDataService.deleteReminder(id);
       _loadReminders();
       
       if (!mounted) return;
@@ -97,7 +95,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         onPressed: () async {
           final result = await Navigator.pushNamed(context, AppRoutes.addReminder);
           if (result == true) {
-            _loadReminders();
+            _loadReminders(); // Recharger après ajout
           }
         },
         backgroundColor: const Color(0xFF4CAF50),
@@ -209,11 +207,14 @@ class _RemindersScreenState extends State<RemindersScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: () {
+            _showReminderDetails(reminder);
+          },
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
+                // Icône + Heure
                 Container(
                   width: 70,
                   height: 70,
@@ -246,6 +247,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 
                 const SizedBox(width: 16),
                 
+                // Détails
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,10 +269,66 @@ class _RemindersScreenState extends State<RemindersScreen> {
                           ),
                         ),
                       ],
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              reminder.frequency ?? 'Quotidien',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          if (reminder.isActive) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    size: 12,
+                                    color: Colors.green.shade700,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Actif',
+                                    style: TextStyle(
+                                      color: Colors.green.shade700,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                 ),
                 
+                // Bouton supprimer
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
                   onPressed: () => _deleteReminder(reminder.id, reminder.title),
@@ -279,6 +337,143 @@ class _RemindersScreenState extends State<RemindersScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showReminderDetails(ReminderModel reminder) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF9C27B0), Color(0xFF7B1FA2)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.medication,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    reminder.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 24),
+            
+            if (reminder.dosage != null)
+              _buildDetailRow('Dosage', reminder.dosage!, Icons.science),
+            
+            _buildDetailRow(
+              'Horaires',
+              reminder.timeSlots.join(', '),
+              Icons.access_time,
+ 
+           ),
+            
+            _buildDetailRow(
+              'Fréquence',
+              reminder.frequency ?? 'Quotidien',
+              Icons.repeat,
+            ),
+            
+            if (reminder.instructions != null)
+              _buildDetailRow(
+                'Instructions',
+                reminder.instructions!,
+                Icons.info_outline,
+              ),
+            
+            const SizedBox(height: 24),
+            
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Fonction "Marquer comme pris" - À venir'),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Marquer comme pris',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
