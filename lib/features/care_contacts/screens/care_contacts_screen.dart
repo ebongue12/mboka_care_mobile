@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
-import '../../../core/services/local_data_service.dart';
+import '../../../data/services/data_sync_service.dart';
 import '../../../data/models/care_contact_model.dart';
 import '../../../shared/widgets/slide_fade_transition.dart';
 
@@ -24,7 +24,7 @@ class _CareContactsScreenState extends State<CareContactsScreen> {
   Future<void> _loadContacts() async {
     setState(() => _isLoading = true);
     
-    final contacts = await LocalDataService.getCareContacts();
+    final contacts = await DataSyncService().getCareContacts();
     
     setState(() {
       _contacts = contacts;
@@ -53,7 +53,7 @@ class _CareContactsScreenState extends State<CareContactsScreen> {
     );
 
     if (confirm == true) {
-      await LocalDataService.deleteCareContact(id);
+      await DataSyncService().deleteCareContact(id);
       _loadContacts();
       
       if (!mounted) return;

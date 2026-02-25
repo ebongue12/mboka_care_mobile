@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
-import '../../../core/services/local_data_service.dart';
+import '../../../data/services/data_sync_service.dart';
 import '../../../shared/widgets/slide_fade_transition.dart';
 
 class FamilyScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
   Future<void> _loadFamilyMembers() async {
     setState(() => _isLoading = true);
     
-    final members = await LocalDataService.getFamilyMembers();
+    final members = await DataSyncService().getFamilyMembers();
     
     setState(() {
       _familyMembers = members;

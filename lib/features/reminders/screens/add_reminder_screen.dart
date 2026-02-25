@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/local_data_service.dart';
+import '../../../data/services/data_sync_service.dart';
 import '../../../data/models/reminder_model.dart';
 
 class AddReminderScreen extends StatefulWidget {
@@ -47,7 +47,7 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
     );
 
     // Sauvegarder localement
-    final success = await LocalDataService.saveReminder(reminder);
+    final success = await DataSyncService().saveReminder(reminder);
 
     setState(() => _isSaving = false);
 

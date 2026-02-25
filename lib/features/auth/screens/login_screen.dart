@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../app/routes.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../core/network/api_client.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,28 +13,57 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedRole = 'patient'; // Par défaut patient
+  String _selectedRole = 'PATIENT';
+  bool _isLoading = false;
 
   void _login() async {
-    // Sauvegarder le rôle
-    await LocalStorage.saveUserId(_selectedRole);
-    
-    if (!mounted) return;
-    
-    // Rediriger selon le rôle
-    String route;
-    switch (_selectedRole) {
-      case 'doctor':
-        route = AppRoutes.doctorDashboard;
-        break;
-      case 'hospital':
-        route = AppRoutes.hospitalDashboard;
-        break;
-      default:
-        route = AppRoutes.home;
+    if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Remplissez tous les champs')),
+      );
+      return;
     }
-    
-    Navigator.pushReplacementNamed(context, route);
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Appel API
+      final response = await ApiClient().login({
+        'phone_number': _phoneController.text,
+        'password': _passwordController.text,
+      });
+
+      if (response.statusCode == 200) {
+        // Sauvegarder token et infos
+        await LocalStorage.saveToken(response.data['tokens']['access']);
+        await LocalStorage.saveUserId(response.data['user']['id'].toString());
+        
+        if (!mounted) return;
+
+        // Redirection selon rôle
+        String route;
+        final userType = response.data['user']['user_type'];
+        switch (userType) {
+          case 'MEDECIN':
+            route = AppRoutes.doctorDashboard;
+            break;
+          case 'HOPITAL':
+            route = AppRoutes.hospitalDashboard;
+            break;
+          default:
+            route = AppRoutes.home;
+        }
+
+        Navigator.pushReplacementNamed(context, route);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -44,182 +74,102 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFE3F2FD),
-              Color(0xFFBBDEFB),
-              Color(0xFF90CAF9),
-            ],
+            colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB), Color(0xFF90CAF9)],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 40),
-                Center(
-                  child: Hero(
-                    tag: 'logo',
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
-                        ),
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF2196F3).withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.health_and_safety,
-                        size: 55,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-                const Text(
-                  'Connexion',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1976D2),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Connectez-vous à votre compte',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 60),
                 
-                // Sélection du rôle
-                const Text('Je suis :',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildRoleButton('patient', 'Patient', Icons.person),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildRoleButton('doctor', 'Médecin', Icons.medical_services),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildRoleButton('hospital', 'Hôpital', Icons.local_hospital),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-                
+                // Logo
                 Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      hintText: '+237 6XX XXX XXX',
-                      prefixIcon: Icon(Icons.phone),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(20),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      hintText: 'Mot de passe',
-                      prefixIcon: Icon(Icons.lock),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(20),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Container(
-                  height: 56,
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF2196F3).withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _login,
-                      borderRadius: BorderRadius.circular(12),
-                      child: const Center(
-                        child: Text(
-                          'Se connecter',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                  child: const Icon(Icons.health_and_safety, size: 60, color: Colors.white),
+                ),
+                
+                const SizedBox(height: 32),
+                const Text(
+                  'MBOKA-CARE',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF1976D2)),
+                ),
+                const Text(
+                  'Votre santé, notre priorité',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                
+                const SizedBox(height: 48),
+                
+                // Téléphone
+                TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Téléphone',
+                    prefixIcon: const Icon(Icons.phone),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 24),
-                Center(
-                  child: TextButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, AppRoutes.roleSelection),
-                    child: const Text(
-                      "Pas de compte ? S'inscrire",
-                      style: TextStyle(
-                        color: Color(0xFF2196F3),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                
+                const SizedBox(height: 16),
+                
+                // Mot de passe
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Mot de passe',
+                    prefixIcon: const Icon(Icons.lock),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Bouton connexion
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2196F3),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Se connecter',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.register),
+                  child: const Text('Pas de compte ? S\'inscrire'),
                 ),
               ],
             ),
@@ -227,48 +177,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildRoleButton(String role, String label, IconData icon) {
-    final isSelected = _selectedRole == role;
-    return InkWell(
-      onTap: () => setState(() => _selectedRole = role),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2196F3) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF2196F3) : Colors.grey.shade300,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.grey,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: isSelected ? Colors.white : Colors.grey,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _phoneController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 }
