@@ -151,7 +151,7 @@ class NotificationManager {
 }
 
   /// Afficher popup confirmation
-  static Future<void> showConfirmationDialog(BuildContext context, ReminderModel reminder, String timeSlot) async {
+  Future<void> showConfirmationDialog(BuildContext context, ReminderModel reminder, String timeSlot) async {
     final logService = MedicationLogService();
     
     showDialog(
