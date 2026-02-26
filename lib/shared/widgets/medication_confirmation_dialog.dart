@@ -161,3 +161,22 @@ class MedicationConfirmationDialog extends StatelessWidget {
     );
   }
 }
+
+// TODO: Ajouter import
+// import '../../core/services/sms_notification_service.dart';
+// import '../../data/services/data_sync_service.dart';
+
+// Dans onTaken(), ajouter après logService.markAsTaken() :
+// 
+// // Récupérer les proches
+// final contacts = await DataSyncService().getCareContacts();
+// final notifiableContacts = contacts.where((c) => c.receiveNotifications).toList();
+//
+// // Notifier par SMS
+// if (notifiableContacts.isNotEmpty) {
+//   await SmsNotificationService().notifyContacts(
+//     patientName: 'Patient', // TODO: Récupérer nom réel
+//     medicationName: reminder.title,
+//     contacts: notifiableContacts,
+//   );
+// }
