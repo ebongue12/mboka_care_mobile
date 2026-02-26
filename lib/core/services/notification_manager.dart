@@ -1,4 +1,7 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import '../../data/services/medication_log_service.dart';
+import '../../shared/widgets/medication_confirmation_dialog.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/reminder_model.dart';
 
@@ -146,3 +149,55 @@ class NotificationManager {
     // On va implémenter ça dans la PHASE 2
   }
 }
+
+  /// Afficher popup confirmation
+  static Future<void> showConfirmationDialog(BuildContext context, ReminderModel reminder, String timeSlot) async {
+    final logService = MedicationLogService();
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false, // Empêcher fermeture avec back
+        child: MedicationConfirmationDialog(
+          reminder: reminder,
+          onTaken: () async {
+            await logService.markAsTaken(reminder.id, timeSlot);
+            
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✓ Prise confirmée !'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+            
+            // TODO PHASE 4: Notifier les proches
+          },
+          onSkipped: () async {
+            await logService.markAsSkipped(reminder.id, timeSlot);
+            
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Prise sautée'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          },
+          onDelayed: () async {
+            await logService.delayReminder(reminder, 5);
+            
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('⏰ Rappel dans 5 minutes'),
+                backgroundColor: Colors.blue,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
