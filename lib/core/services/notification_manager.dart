@@ -1,9 +1,8 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import '../../data/services/medication_log_service.dart';
-import '../../shared/widgets/medication_confirmation_dialog.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/reminder_model.dart';
+import '../../data/services/medication_log_service.dart';
+import '../../shared/widgets/medication_confirmation_dialog.dart';
 
 class NotificationManager {
   static final NotificationManager _instance = NotificationManager._internal();
@@ -17,7 +16,7 @@ class NotificationManager {
     if (_initialized) return;
 
     await AwesomeNotifications().initialize(
-      null, // Icône par défaut
+      'resource://drawable/ic_launcher', // Icône
       [
         NotificationChannel(
           channelKey: 'medication_reminders',
@@ -27,22 +26,39 @@ class NotificationManager {
           ledColor: Colors.white,
           importance: NotificationImportance.Max,
           channelShowBadge: true,
+          
+          // SON D'ALARME FORT
           playSound: true,
+          soundSource: 'resource://raw/res_alarm', // Son système
           enableVibration: true,
+          vibrationPattern: highVibrationPattern, // Vibration forte
           enableLights: true,
+          
+          // CRITIQUES pour réveiller
+          criticalAlerts: true,
+          defaultPrivacy: NotificationPrivacy.Public,
         ),
       ],
       debug: true,
     );
 
-    // Demander permissions
-    await AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    // Demander permissions critiques
+    await AwesomeNotifications().isNotificationAllowed().then((isAllowed) async {
       if (!isAllowed) {
-        AwesomeNotifications().requestPermissionToSendNotifications();
+        await AwesomeNotifications().requestPermissionToSendNotifications(
+          permissions: [
+            NotificationPermission.Alert,
+            NotificationPermission.Sound,
+            NotificationPermission.Badge,
+            NotificationPermission.Vibration,
+            NotificationPermission.Light,
+            NotificationPermission.CriticalAlert,
+          ],
+        );
       }
     });
 
-    // Écouter les actions (quand user tape sur notif)
+    // Écouter les actions
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: onActionReceivedMethod,
       onNotificationCreatedMethod: onNotificationCreatedMethod,
@@ -52,14 +68,12 @@ class NotificationManager {
     _initialized = true;
   }
 
-  /// Programmer un rappel quotidien
+  /// Programmer un rappel avec ALARME SONORE
   Future<void> scheduleReminder(ReminderModel reminder) async {
     if (!_initialized) await initialize();
 
-    // Supprimer anciennes notifications pour ce rappel
     await cancelReminder(reminder.id);
 
-    // Programmer pour chaque créneau horaire
     for (int i = 0; i < reminder.timeSlots.length; i++) {
       final timeSlot = reminder.timeSlots[i];
       final parts = timeSlot.split(':');
@@ -72,41 +86,63 @@ class NotificationManager {
           channelKey: 'medication_reminders',
           title: '💊 ${reminder.title}',
           body: reminder.dosage != null 
-              ? 'Dose : ${reminder.dosage}'
+              ? 'Dose : ${reminder.dosage}\n\nTouchez pour confirmer'
               : 'Il est temps de prendre votre médicament',
-          category: NotificationCategory.Reminder,
+          category: NotificationCategory.Alarm, // IMPORTANT : Type ALARM
           notificationLayout: NotificationLayout.Default,
+          
+          // RÉVEILLER L'ÉCRAN
           wakeUpScreen: true,
           fullScreenIntent: true,
           criticalAlert: true,
+          
+          // ACTIONS
+          actionType: ActionType.Default,
+          autoDismissible: false, // Ne pas disparaître automatiquement
+          
           payload: {
             'reminder_id': reminder.id,
             'time_slot': timeSlot,
             'title': reminder.title,
+            'dosage': reminder.dosage ?? '',
           },
         ),
+        actionButtons: [
+          NotificationActionButton(
+            key: 'TAKEN',
+            label: '✓ J\'ai pris',
+            actionType: ActionType.SilentAction,
+            color: const Color(0xFF4CAF50),
+          ),
+          NotificationActionButton(
+            key: 'DELAY',
+            label: '⏰ Dans 5 min',
+            actionType: ActionType.SilentAction,
+            color: const Color(0xFF2196F3),
+          ),
+        ],
         schedule: NotificationCalendar(
           hour: hour,
           minute: minute,
           second: 0,
-          repeats: true, // Répéter chaque jour
+          repeats: true,
+          allowWhileIdle: true, // IMPORTANT : Sonner même en veille
         ),
       );
 
-      debugPrint('✅ Notification programmée : ${reminder.title} à $timeSlot');
+      debugPrint('✅ Alarme programmée : ${reminder.title} à $timeSlot');
     }
   }
 
-  /// Annuler les notifications d'un rappel
+  /// Annuler les notifications
   Future<void> cancelReminder(String reminderId) async {
-    // Annuler jusqu'à 10 créneaux possibles
     for (int i = 0; i < 10; i++) {
       final notifId = _generateNotificationId(reminderId, i);
       await AwesomeNotifications().cancel(notifId);
     }
   }
 
-  /// Afficher notification immédiate (test)
+  /// Notification immédiate (test)
   Future<void> showImmediateNotification(String title, String body) async {
     if (!_initialized) await initialize();
 
@@ -117,38 +153,47 @@ class NotificationManager {
         title: title,
         body: body,
         wakeUpScreen: true,
+        criticalAlert: true,
+        category: NotificationCategory.Alarm,
       ),
     );
   }
 
-  /// Générer ID unique pour notification
+  /// Générer ID unique
   int _generateNotificationId(String reminderId, int index) {
     final lastChars = reminderId.substring(reminderId.length - 8);
     final base = int.parse(lastChars, radix: 16) % 100000;
     return base + index;
   }
 
-  /// Callback quand notification est créée
+  /// Callbacks
   @pragma("vm:entry-point")
   static Future<void> onNotificationCreatedMethod(ReceivedNotification notification) async {
     debugPrint('📬 Notification créée: ${notification.title}');
   }
 
-  /// Callback quand notification est affichée
   @pragma("vm:entry-point")
   static Future<void> onNotificationDisplayedMethod(ReceivedNotification notification) async {
     debugPrint('📱 Notification affichée: ${notification.title}');
   }
 
-  /// Callback quand user tape sur notification
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(ReceivedAction action) async {
-    debugPrint('👆 Action reçue: ${action.payload}');
+    debugPrint('👆 Action: ${action.buttonKeyPressed}');
     
-    // TODO: Ouvrir popup "As-tu pris ?"
-    // On va implémenter ça dans la PHASE 2
+    final reminderId = action.payload?['reminder_id'];
+    final timeSlot = action.payload?['time_slot'];
+    
+    if (reminderId == null || timeSlot == null) return;
+    
+    final logService = MedicationLogService();
+    
+    if (action.buttonKeyPressed == 'TAKEN') {
+      await logService.markAsTaken(reminderId, timeSlot);
+    } else if (action.buttonKeyPressed == 'DELAY') {
+      // TODO: Reprogrammer dans 5 min
+    }
   }
-}
 
   /// Afficher popup confirmation
   Future<void> showConfirmationDialog(BuildContext context, ReminderModel reminder, String timeSlot) async {
@@ -158,7 +203,7 @@ class NotificationManager {
       context: context,
       barrierDismissible: false,
       builder: (context) => WillPopScope(
-        onWillPop: () async => false, // Empêcher fermeture avec back
+        onWillPop: () async => false,
         child: MedicationConfirmationDialog(
           reminder: reminder,
           onTaken: () async {
@@ -172,8 +217,6 @@ class NotificationManager {
                 duration: Duration(seconds: 2),
               ),
             );
-            
-            // TODO PHASE 4: Notifier les proches
           },
           onSkipped: () async {
             await logService.markAsSkipped(reminder.id, timeSlot);
@@ -201,3 +244,4 @@ class NotificationManager {
       ),
     );
   }
+}
