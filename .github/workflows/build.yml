@@ -25,32 +25,24 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Build APK debug
-        run: flutter build apk --debug
+      - name: Build APK debug (verbose)
+        run: flutter build apk --debug --verbose
       
-      - name: Find APK
+      - name: List build outputs
+        if: always()
         run: |
-          echo "Recherche de l'APK..."
-          find build -name "*.apk" -type f
-          ls -la build/app/outputs/flutter-apk/ || echo "Dossier flutter-apk introuvable"
-          ls -la build/app/outputs/apk/debug/ || echo "Dossier apk/debug introuvable"
+          echo "=== Contenu build/ ==="
+          ls -laR build/ || echo "Dossier build/ vide"
+          echo ""
+          echo "=== Recherche APK ==="
+          find . -name "*.apk" -type f || echo "Aucun APK trouvé"
       
-      - name: Upload APK (flutter-apk)
-        uses: actions/upload-artifact@v4
-        continue-on-error: true
-        with:
-          name: mboka-care-debug-flutter
-          path: build/app/outputs/flutter-apk/app-debug.apk
-      
-      - name: Upload APK (apk/debug)
-        uses: actions/upload-artifact@v4
-        continue-on-error: true
-        with:
-          name: mboka-care-debug-standard
-          path: build/app/outputs/apk/debug/app-debug.apk
-      
-      - name: Upload all APKs found
+      - name: Upload APK if exists
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mboka-care-all-apks
-          path: build/**/*.apk
+          name: mboka-care-debug
+          path: |
+            build/app/outputs/**/*.apk
+            build/**/*.apk
+          if-no-files-found: warn
