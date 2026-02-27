@@ -14,7 +14,7 @@ class FirebaseNotificationService {
   Future<void> initialize() async {
     try {
       // Initialiser Firebase (nécessite google-services.json)
-      // await Firebase.initializeApp();
+      await Firebase.initializeApp();
       
       // Demander permissions
       NotificationSettings settings = await _messaging.requestPermission(

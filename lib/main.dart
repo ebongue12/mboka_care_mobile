@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'app/routes.dart';
 import 'core/storage/local_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/notification_manager.dart';
+import 'core/services/firebase_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Initialiser Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   // Initialiser stockage local
   await LocalStorage.init();
   
-  // Initialiser notifications PRODUCTION
+  // Initialiser notifications
   await NotificationManager().initialize();
+  await FirebaseNotificationService().initialize();
   
   runApp(const MbokaCareApp());
 }
