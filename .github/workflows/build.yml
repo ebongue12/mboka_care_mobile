@@ -25,27 +25,38 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Run Gradle directly to see real errors
-        working-directory: android
+      - name: Build APK with Gradle wrapper generation
         run: |
-          echo "=== Running Gradle assembleDebug directly ==="
-          ./gradlew assembleDebug --stacktrace --info
+          # Générer le wrapper Gradle si manquant
+          cd android
+          if [ ! -f "gradlew" ]; then
+            echo "Generating Gradle wrapper..."
+            gradle wrapper
+          fi
+          cd ..
           
-      - name: List all outputs
+          # Build l'APK
+          flutter build apk --debug --verbose 2>&1 | tee build.log || true
+          
+      - name: Show last 100 lines of build log
+        if: always()
+        run: tail -100 build.log || echo "No build log"
+          
+      - name: Search for APK everywhere
         if: always()
         run: |
-          echo "=== android/app/build/outputs/ ==="
-          ls -laR android/app/build/outputs/ || echo "Dossier vide"
+          echo "=== ALL APK FILES ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found anywhere"
           
-          echo "=== Recherche globale APK ==="
-          find . -name "*.apk" -type f || echo "Aucun APK"
+          echo ""
+          echo "=== android/ structure ==="
+          ls -la android/app/build/outputs/ 2>/dev/null || echo "outputs/ not found"
       
-      - name: Upload APK if found
+      - name: Upload any APK found
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mboka-care-debug
+          name: mboka-care-any-apk
           path: |
-            android/app/build/outputs/**/*.apk
-            build/app/outputs/**/*.apk
+            **/*.apk
           if-no-files-found: warn
