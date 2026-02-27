@@ -25,32 +25,27 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Build APK debug
-        continue-on-error: true
-        run: flutter build apk --debug
+      - name: Run Gradle directly to see real errors
+        working-directory: android
+        run: |
+          echo "=== Running Gradle assembleDebug directly ==="
+          ./gradlew assembleDebug --stacktrace --info
           
-      - name: Find and copy APK (always run)
+      - name: List all outputs
         if: always()
         run: |
-          echo "=== Recherche de l'APK ==="
-          find build -name "*.apk" -type f
+          echo "=== android/app/build/outputs/ ==="
+          ls -laR android/app/build/outputs/ || echo "Dossier vide"
           
-          APK_PATH=$(find build -name "app-debug.apk" -type f | head -n 1)
-          
-          if [ -n "$APK_PATH" ]; then
-            echo "✅ APK trouvé : $APK_PATH"
-            mkdir -p output
-            cp "$APK_PATH" output/mboka-care-debug.apk
-            ls -lh output/
-          else
-            echo "❌ Aucun APK trouvé"
-            exit 1
-          fi
+          echo "=== Recherche globale APK ==="
+          find . -name "*.apk" -type f || echo "Aucun APK"
       
-      - name: Upload APK
+      - name: Upload APK if found
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mboka-care-debug
-          path: output/mboka-care-debug.apk
-          if-no-files-found: error
+          path: |
+            android/app/build/outputs/**/*.apk
+            build/app/outputs/**/*.apk
+          if-no-files-found: warn
