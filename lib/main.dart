@@ -11,7 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialiser Firebase
-  await Firebase.initializeApp(
+  // await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
@@ -20,7 +20,7 @@ void main() async {
   
   // Initialiser notifications
   await NotificationManager().initialize();
-  await FirebaseNotificationService().initialize();
+  // await FirebaseNotificationService().initialize();
   
   runApp(const MbokaCareApp());
 }
