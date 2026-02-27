@@ -26,27 +26,31 @@ jobs:
         run: flutter pub get
       
       - name: Build APK debug
-        run: |
-          flutter build apk --debug
-          echo "✅ Build terminé"
+        continue-on-error: true
+        run: flutter build apk --debug
           
-      - name: Find and copy APK
+      - name: Find and copy APK (always run)
+        if: always()
         run: |
-          # Chercher l'APK
+          echo "=== Recherche de l'APK ==="
+          find build -name "*.apk" -type f
+          
           APK_PATH=$(find build -name "app-debug.apk" -type f | head -n 1)
-          echo "APK trouvé : $APK_PATH"
           
-          # Créer dossier de sortie
-          mkdir -p output
-          
-          # Copier l'APK
-          cp "$APK_PATH" output/mboka-care-debug.apk
-          
-          echo "✅ APK copié vers output/mboka-care-debug.apk"
-          ls -lh output/
+          if [ -n "$APK_PATH" ]; then
+            echo "✅ APK trouvé : $APK_PATH"
+            mkdir -p output
+            cp "$APK_PATH" output/mboka-care-debug.apk
+            ls -lh output/
+          else
+            echo "❌ Aucun APK trouvé"
+            exit 1
+          fi
       
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mboka-care-debug
           path: output/mboka-care-debug.apk
+          if-no-files-found: error
