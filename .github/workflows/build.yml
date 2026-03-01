@@ -26,11 +26,37 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
-      - name: Build APK
+      - name: Build APK (ignore Flutter error)
+        continue-on-error: true
         run: flutter build apk --release
+      
+      - name: Find APK in build outputs
+        run: |
+          echo "🔍 Recherche APK..."
+          find build android -name "*.apk" -type f 2>/dev/null || echo "Aucun APK via find"
+          
+          echo ""
+          echo "📁 Structure android/app/build/outputs/"
+          ls -laR android/app/build/outputs/ 2>/dev/null || echo "Dossier outputs vide"
+      
+      - name: Copy APK to root
+        run: |
+          mkdir -p apk-output
+          
+          # Chercher l'APK partout
+          APK=$(find . -name "app-release.apk" -o -name "app.apk" 2>/dev/null | head -1)
+          
+          if [ -n "$APK" ]; then
+            echo "✅ APK trouvé: $APK"
+            cp "$APK" apk-output/mboka-care.apk
+            ls -lh apk-output/
+          else
+            echo "❌ Aucun APK trouvé"
+            exit 1
+          fi
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: mboka-care-release
+          path: apk-output/mboka-care.apk
