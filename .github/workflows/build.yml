@@ -1,8 +1,8 @@
-name: Build APK MBOKA-CARE
+name: Build APK
 
 on:
   push:
-    branches: [ main, production-v1.0 ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -14,49 +14,23 @@ jobs:
       
       - uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
       
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
+          cache: true
       
-      - name: Install dependencies
+      - name: Get dependencies
         run: flutter pub get
       
-      - name: Build APK with Gradle wrapper generation
-        run: |
-          # Générer le wrapper Gradle si manquant
-          cd android
-          if [ ! -f "gradlew" ]; then
-            echo "Generating Gradle wrapper..."
-            gradle wrapper
-          fi
-          cd ..
-          
-          # Build l'APK
-          flutter build apk --debug --verbose 2>&1 | tee build.log || true
-          
-      - name: Show last 100 lines of build log
-        if: always()
-        run: tail -100 build.log || echo "No build log"
-          
-      - name: Search for APK everywhere
-        if: always()
-        run: |
-          echo "=== ALL APK FILES ==="
-          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found anywhere"
-          
-          echo ""
-          echo "=== android/ structure ==="
-          ls -la android/app/build/outputs/ 2>/dev/null || echo "outputs/ not found"
+      - name: Build APK
+        run: flutter build apk --release
       
-      - name: Upload any APK found
-        if: always()
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: mboka-care-any-apk
-          path: |
-            **/*.apk
-          if-no-files-found: warn
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
